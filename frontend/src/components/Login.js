@@ -1,15 +1,15 @@
 import React from 'react'
 import Notification from './Notification'
 
-const Login = (props) => (
-  <form onSubmit={props.login}>
+const Login = ({ login, username, password, onChange, failureMessageState }) => (
+  <form onSubmit={login}>
     <div>
       Username
       <input
         type="text"
         name="username"
-        value={props.username}
-        onChange={props.onChange}
+        value={username}
+        onChange={onChange}
       />
     </div>
     <div>
@@ -17,12 +17,12 @@ const Login = (props) => (
       <input
         type="password"
         name="password"
-        value={props.password}
-        onChange={props.onChange}
+        value={password}
+        onChange={onChange}
       />
     </div>
     <button type="submit">Log in</button>
-    <Notification message={props.failureMessageState} notifType="failure"/>
+    <Notification message={failureMessageState} notifType="failure"/>
   </form>
 )
 

@@ -16,7 +16,7 @@ blogSchema.statics.format = function(blog) {
     author: blog.author,
     url: blog.url,
     likes: blog.likes,
-    user: blog.user.toString()
+    user: blog.user
   }
 }
 

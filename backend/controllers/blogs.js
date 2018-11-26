@@ -3,6 +3,7 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
+
 blogsRouter.get('/', async (request, response) => {
   try{
     const blogs = await Blog
@@ -25,8 +26,8 @@ blogsRouter.post('/', async (request, response) => {
       return response.status(401).json({ error: 'token missing or invalid' })
     }
 
-    if(body.title === undefined||body.url === undefined){
-      return response.status(400).json({ error: 'both title & url required' })
+    if(body.title.length === 0||body.url.length === 0||body.author.length === 0){
+      return response.status(400).json({ error: 'title, url & author required' })
     }
 
     const user = await User.findById(decodedToken.id)
