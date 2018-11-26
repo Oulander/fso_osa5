@@ -14,7 +14,7 @@ class App extends React.Component {
       blogs: [],
       username: '',
       password: '',
-      user: "jou",
+      user: null,
       successMessage: null,
       failureMessage: null
     }
@@ -24,8 +24,6 @@ class App extends React.Component {
     let blogs = await blogService.getAll()
 
     this.setState({ blogs })
-
-    this.setState({user: "moi"})
 
     const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if (loggedUserJSON) {
@@ -39,7 +37,7 @@ class App extends React.Component {
     this.setState({ [event.target.name]: event.target.value })
   }
 
-  login = async (event) => {
+  handleLogin = async (event) => {
     event.preventDefault()
     try{
       const user = await loginService.login({
@@ -72,7 +70,7 @@ class App extends React.Component {
     }, 5000)
   }
 
-  logout = () => {
+  handleLogout = () => {
     return () => {
       window.localStorage.removeItem('loggedBlogAppUser')
       this.setState({ user: null })
@@ -107,7 +105,7 @@ class App extends React.Component {
               username={this.state.username}
               password={this.state.password}
               onChange={this.handleLoginFieldChange}
-              login={this.login}
+              login={this.handleLogin}
               failureMessageState = {this.state.failureMessage}
             />
           </div>
@@ -116,7 +114,7 @@ class App extends React.Component {
     return (
         <div>
           <h2>Blog App</h2>
-          <p><span>{this.state.user.name} logged in</span><button onClick={this.logout()}>Logout</button></p>
+          <p><span>{this.state.user.name} logged in</span><button onClick={this.handleLogout()}>Logout</button></p>
           <Togglable
             showButtonLabel = "Show new blog form"
             hideButtonLabel = "Hide new blog form"
