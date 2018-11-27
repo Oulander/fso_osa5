@@ -24,6 +24,7 @@ class App extends React.Component {
     let blogs = await blogService.getAll()
 
     this.setState({ blogs })
+    this.sortBlogs()
 
     const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if (loggedUserJSON) {
@@ -31,6 +32,16 @@ class App extends React.Component {
       this.setState({ user })
       blogService.setToken(user.token)
     }
+  }
+
+  sortBlogs = () => {
+    let blogs = this.state.blogs
+    blogs.sort((a, b) =>{
+      if (a.likes < b.likes) return 1
+      else if (a.likes > b.likes) return -1
+      else return 0
+    })
+    this.setState({ blogs })
   }
 
   handleLoginFieldChange = (event) => {
@@ -46,7 +57,6 @@ class App extends React.Component {
       })
 
       window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
-      console.log(user)
       this.setState({ username: '', password: '', user})
       blogService.setToken(user.token)
 
@@ -77,23 +87,68 @@ class App extends React.Component {
     }
   }
 
+  handleBlogLike = async (blog) => {
+    try{
+      let blogs = this.state.blogs
+      const updatedBlogIndex = blogs.indexOf(blog)
+      blog.likes += 1
+
+      const id = blog.id
+      delete blog.id
+      blog.user = blog.user ? blog.user._id : null
+
+      const updatedBlog = await blogService.update(id, blog)
+      blogs[updatedBlogIndex] = updatedBlog
+      this.setState({ blogs })
+      this.sortBlogs()
+
+    } catch(exception){
+      this.setFailureMessage('Liking the blog ran into an error.')
+    }
+  }
+
+  handleBlogDelete = async (blog) => {
+    try{
+      let blogs = this.state.blogs
+      const deletedBlogIndex = blogs.indexOf(blog)
+      blogs.splice(deletedBlogIndex, 1)
+
+      const id = blog.id
+
+      const deleteSuccesful = await blogService.remove(id)
+
+      if (deleteSuccesful) {
+        this.setState({ blogs })
+        this.sortBlogs()
+        this.setSuccessMessage(`Successfully deleted "${blog.title}" by "${blog.author}"!`)
+      }
+
+    } catch(exception){
+      this.setFailureMessage('Deleting the blog ran into an error.')
+    }
+  }
+
   addBlog = async (title, author, url) => {
 
-    if(title.length===0||author.length===0||url.length===0){
-      this.setFailureMessage('Title, author & url needed!')
-      return
+    try{
+      if(title.length===0||author.length===0||url.length===0){
+        this.setFailureMessage('Title, author & url needed!')
+        return
+      }
+
+      const addedBlog = await blogService.create({
+        title: title,
+        author: author,
+        url: url
+      })
+
+      this.setState({blogs: this.state.blogs.concat(addedBlog)})
+      this.newBlogForm.toggleVisibility()
+      this.sortBlogs()
+      this.setSuccessMessage('Blog successfully created!')
+    } catch(exception){
+      this.setFailureMessage('Empty blog content')
     }
-
-    const addedBlog = await blogService.create({
-      title: title,
-      author: author,
-      url: url
-    })
-
-    this.setState({blogs: this.state.blogs.concat(addedBlog)})
-
-    this.setSuccessMessage('Blog successfully created!')
-
   }
 
   render() {
@@ -118,14 +173,31 @@ class App extends React.Component {
           <Togglable
             showButtonLabel = "Show new blog form"
             hideButtonLabel = "Hide new blog form"
+            ref = {component => this.newBlogForm = component}
             >
             <AddBlogForm onSubmit={this.addBlog}/>
           </Togglable>
           <Notification message={this.state.failureMessage} notifType="failure"/>
           <Notification message={this.state.successMessage} notifType="success"/>
           <h2>List of blogs</h2>
-          {this.state.blogs.map(blog =>
-            <Blog key={blog.id} blog={blog}/>
+          {this.state.blogs.map((blog) => {
+            let showDeleteButton = false
+            if (blog.user === null){
+              showDeleteButton = true
+            }
+            else {
+              showDeleteButton = this.state.user.username === blog.user.username
+            }
+
+            return(
+            <Blog
+              key={blog.id}
+              blog={blog}
+              handleLike={this.handleBlogLike}
+              handleDelete={this.handleBlogDelete}
+              showDeleteButton={showDeleteButton}
+            />)
+          }
           )}
         </div>
     );

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 class AddBlogForm extends React.Component {
   constructor(props) {
@@ -8,6 +9,10 @@ class AddBlogForm extends React.Component {
       author: '',
       url: '',
     }
+  }
+
+  static propTypes = {
+    onSubmit: PropTypes.func.isRequired
   }
 
   handleClick = (event) => {

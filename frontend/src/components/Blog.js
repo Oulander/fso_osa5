@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+
 export default class Blog extends React.Component {
   constructor(props){
     super(props)
@@ -7,6 +9,12 @@ export default class Blog extends React.Component {
     }
   }
 
+  static propTypes = {
+    blog: PropTypes.object.isRequired,
+    handleLike: PropTypes.func.isRequired,
+    handleDelete: PropTypes.func.isRequired,
+    showDeleteButton: PropTypes.bool.isRequired
+  }
 
   toggleVisibility = () => {
     this.setState({ visible: !this.state.visible })
@@ -16,13 +24,22 @@ export default class Blog extends React.Component {
     this.setState({ visible: true })
   }
 
-  clickTest = (event) => {
+  handleLikeClick = (event) => {
     event.preventDefault()
     event.stopPropagation()
+    this.props.handleLike(this.props.blog)
+  }
+
+  handleDeleteClick = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (window.confirm(`Do you really want to delete the blog "${this.props.blog.title}" by "${this.props.blog.author}"?`)){
+      this.props.handleDelete(this.props.blog)
+    }
   }
 
   render() {
-    const cssWhenContentShown = { display: this.state.visible ? '' : 'none' }
+    const cssToShowExtraContent = { display: this.state.visible ? '' : 'none' }
     const blogStyle = {
       paddingTop: 10,
       paddingLeft: 2,
@@ -30,15 +47,20 @@ export default class Blog extends React.Component {
       borderWidth: 1,
       marginBottom: 5
     }
+    const cssToShowDeleteButton = { display: this.props.showDeleteButton ? '' : 'none' }
+
+    const userName = this.props.blog.user ? this.props.blog.user.name : 'unknown user'
+
     return (
       <div onClick={ this.toggleVisibility } style={blogStyle}>
         <div>
           {this.props.blog.title} {this.props.blog.author}
         </div>
-        <div style = {cssWhenContentShown}>
+        <div style = {cssToShowExtraContent}>
           <div><a href={this.props.blog.url}>{this.props.blog.url}</a></div>
-          <div>{`${this.props.blog.likes} likes`}<button onClick={this.clickTest}>like</button></div>
-          <div>{`Added by ${this.props.blog.user.name}`}</div>
+          <div>{`${this.props.blog.likes} likes`}<button onClick={this.handleLikeClick}>like</button></div>
+          <div>{`Added by ${userName}`}</div>
+          <div><button onClick={this.handleDeleteClick} style={cssToShowDeleteButton}>Delete blog</button></div>
         </div>
       </div>
     )}
