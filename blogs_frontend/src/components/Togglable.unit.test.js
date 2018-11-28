@@ -2,7 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import Togglable from './Togglable'
 
-describe.skip('Check if <Togglable> content performs as expected', () => {
+describe('Check if <Togglable> content performs as expected', () => {
   let togglableComponent
 
   beforeEach(() => {
